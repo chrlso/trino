@@ -1087,4 +1087,10 @@ public abstract class AbstractMockMetadata
     {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public NameCanonicalizer getNameCanonicalizer(Session session, String catalogName)
+    {
+        throw new UnsupportedOperationException();
+    }
 }
