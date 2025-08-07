@@ -4227,4 +4227,10 @@ public class IcebergMetadata
         newStats.getColumnStatistics().forEach(statisticsBuilder::setColumnStatistics);
         return statisticsBuilder.build();
     }
+
+    @Override
+    public String canonicalize(ConnectorSession session, String identifier, boolean delimited)
+    {
+        return catalog.canonicalize(identifier, delimited);
+    }
 }
