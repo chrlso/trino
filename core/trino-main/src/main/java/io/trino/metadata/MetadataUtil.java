@@ -61,8 +61,8 @@ public final class MetadataUtil
     public static void checkTableName(String catalogName, Optional<String> schemaName, Optional<String> tableName)
     {
         checkCatalogName(catalogName);
-        schemaName.ifPresent(name -> checkLowerCase(name, "schemaName"));
-        tableName.ifPresent(name -> checkLowerCase(name, "tableName"));
+        schemaName.ifPresent(MetadataUtil::checkSchemaName);
+        tableName.ifPresent(MetadataUtil::checkTableName);
 
         checkArgument(schemaName.isPresent() || tableName.isEmpty(), "tableName specified but schemaName is missing");
     }
@@ -74,19 +74,19 @@ public final class MetadataUtil
 
     public static String checkSchemaName(String schemaName)
     {
-        return checkLowerCase(schemaName, "schemaName");
+        return requireNonNull(schemaName, "schemaName is null");
     }
 
     public static String checkTableName(String tableName)
     {
-        return requireNonNull(tableName, "tableName");
+        return requireNonNull(tableName, "tableName is null");
     }
 
     public static void checkObjectName(String catalogName, String schemaName, String objectName)
     {
         checkLowerCase(catalogName, "catalogName");
-        requireNonNull(schemaName, "schemaName");
-        requireNonNull(objectName, "objectName");
+        requireNonNull(schemaName, "schemaName is null");
+        requireNonNull(objectName, "objectName is null");
     }
 
     public static String checkLowerCase(String value, String name)
@@ -209,7 +209,7 @@ public final class MetadataUtil
 
         String objectName = canonicalizer.canonicalize(parts.get(0).getValue(), parts.get(0).isDelimited());
         String schemaName = (parts.size() > 1) ? canonicalizer.canonicalize(parts.get(1).getValue(), parts.get(1).isDelimited())
-                : session.getSchema().orElseThrow(() -> semanticException(MISSING_SCHEMA_NAME, node, "Schema must be specified when session schema is not set"));
+                : session.getSchema().map(schema -> canonicalizer.canonicalize(schema, true)).orElseThrow(() -> semanticException(MISSING_SCHEMA_NAME, node, "Schema must be specified when session schema is not set"));
         return new QualifiedObjectName(catalogName, schemaName, objectName);
     }
 

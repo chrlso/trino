@@ -86,6 +86,7 @@ public class TestTrinoRestCatalog
                 new TestingTypeManager(),
                 useUniqueTableLocations,
                 false,
+                false,
                 EvictableCacheBuilder.newBuilder().expireAfterWrite(1000, MILLISECONDS).shareNothingWhenDisabled().build(),
                 EvictableCacheBuilder.newBuilder().expireAfterWrite(1000, MILLISECONDS).shareNothingWhenDisabled().build(),
                 true);

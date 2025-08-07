@@ -144,6 +144,7 @@ public class TestTrinoRestCatalogCaseSensitivity
                 TYPE_MANAGER,
                 false, // useUniqueTableLocation
                 caseInsensitive,
+                !caseInsensitive,
                 namespaceCache,
                 tableCache,
                 false); // viewEndpointsEnabled

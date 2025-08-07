@@ -56,6 +56,7 @@ public class IcebergRestCatalogConfig
     private boolean vendedCredentialsEnabled;
     private boolean viewEndpointsEnabled = true;
     private boolean caseInsensitiveNameMatching;
+    private boolean caseSensitiveNamesSupported;
     private Duration caseInsensitiveNameMatchingCacheTtl = new Duration(1, MINUTES);
 
     @NotNull
@@ -207,6 +208,19 @@ public class IcebergRestCatalogConfig
     public IcebergRestCatalogConfig setCaseInsensitiveNameMatchingCacheTtl(Duration caseInsensitiveNameMatchingCacheTtl)
     {
         this.caseInsensitiveNameMatchingCacheTtl = caseInsensitiveNameMatchingCacheTtl;
+        return this;
+    }
+
+    public boolean isCaseSensitiveNamesSupported()
+    {
+        return caseSensitiveNamesSupported;
+    }
+
+    @Config("iceberg.rest-catalog.case-sensitive-names-supported")
+    @ConfigDescription("Enable case-sensitive matching for table and schema names")
+    public IcebergRestCatalogConfig setCaseSensitiveNamesSupported(boolean caseSensitiveNameMatching)
+    {
+        this.caseSensitiveNamesSupported = caseSensitiveNameMatching;
         return this;
     }
 }

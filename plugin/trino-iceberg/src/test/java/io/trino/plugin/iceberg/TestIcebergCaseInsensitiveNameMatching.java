@@ -14,13 +14,10 @@
 package io.trino.plugin.iceberg;
 
 import com.google.common.collect.ImmutableMap;
-import io.trino.plugin.iceberg.catalog.TrinoCatalog;
-import io.trino.spi.connector.ConnectorSession;
 import io.trino.testing.AbstractTestQueryFramework;
 import io.trino.testing.QueryRunner;
 import org.junit.jupiter.api.Test;
 
-import static io.trino.plugin.iceberg.IcebergQueryRunner.ICEBERG_CATALOG;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestIcebergCaseInsensitiveNameMatching
@@ -31,8 +28,7 @@ public class TestIcebergCaseInsensitiveNameMatching
             throws Exception
     {
         return IcebergQueryRunner.builder()
-                .setIcebergProperties(ImmutableMap.of(
-                        "iceberg.case-sensitive-name-matching", "false"))
+                .setIcebergProperties(ImmutableMap.of())
                 .build();
     }
 
@@ -134,23 +130,5 @@ public class TestIcebergCaseInsensitiveNameMatching
         assertUpdate("INSERT INTO backward_compat.\"Existing_Table\" VALUES (2)", 1);
 
         assertQuery("SELECT COUNT(*) FROM backward_compat.existing_table", "VALUES 2");
-    }
-
-    @Test
-    public void testCatalogPropertyConfiguration()
-    {
-        // Test that the configuration is properly applied
-        ConnectorSession session = getQueryRunner().getDefaultSession().toConnectorSession();
-        TrinoCatalog catalog = ((IcebergConnector) getQueryRunner()
-                .getCoordinator()
-                .getConnector(ICEBERG_CATALOG))
-                .getInjector()
-                .getInstance(TrinoCatalog.class);
-
-        // Test case-insensitive canonicalization (all should be lowercased)
-        assertThat(catalog.canonicalize("MixedCase", true)).isEqualTo("mixedcase");
-        assertThat(catalog.canonicalize("MixedCase", false)).isEqualTo("mixedcase");
-        assertThat(catalog.canonicalize("UPPERCASE", true)).isEqualTo("uppercase");
-        assertThat(catalog.canonicalize("UPPERCASE", false)).isEqualTo("uppercase");
     }
 }

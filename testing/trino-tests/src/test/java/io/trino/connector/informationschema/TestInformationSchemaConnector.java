@@ -165,14 +165,14 @@ public class TestInformationSchemaConnector
                 "SELECT count(*) from test_catalog.information_schema.schemata WHERE schema_name LIKE 'test_sch_ma1'",
                 "VALUES 1",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 6)
                         .add("ConnectorMetadata.listSchemaNames")
                         .build());
         assertMetadataCalls(
                 "SELECT count(*) from test_catalog.information_schema.schemata WHERE schema_name LIKE 'test_sch_ma1' AND schema_name IN ('test_schema1', 'test_schema2')",
                 "VALUES 1",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 6)
                         .add("ConnectorMetadata.listSchemaNames")
                         .build());
         assertMetadataCalls(
@@ -186,14 +186,14 @@ public class TestInformationSchemaConnector
                 "SELECT count(table_name), count(table_type) from test_catalog.information_schema.tables WHERE table_schema = 'test_schema1'",
                 "VALUES (1000, 1000)",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 3)
                         .add("ConnectorMetadata.getRelationTypes(schema=test_schema1)")
                         .build());
         assertMetadataCalls(
                 "SELECT count(table_name), count(table_type) from test_catalog.information_schema.tables WHERE table_schema LIKE 'test_sch_ma1'",
                 "VALUES (1000, 1000)",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 6)
                         .add("ConnectorMetadata.listSchemaNames")
                         .add("ConnectorMetadata.getRelationTypes(schema=test_schema1)")
                         .build());
@@ -201,7 +201,7 @@ public class TestInformationSchemaConnector
                 "SELECT count(table_name), count(table_type) from test_catalog.information_schema.tables WHERE table_schema LIKE 'test_sch_ma1' AND table_schema IN ('test_schema1', 'test_schema2')",
                 "VALUES (1000, 1000)",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 4)
                         .add("ConnectorMetadata.getRelationTypes(schema=test_schema1)")
                         .add("ConnectorMetadata.getRelationTypes(schema=test_schema2)")
                         .build());
@@ -215,7 +215,7 @@ public class TestInformationSchemaConnector
                                 .collect(joining(",", "(", ")")),
                 "VALUES (3000, 3000)",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 122)
                         .add("ConnectorMetadata.getRelationTypes")
                         .build());
         assertMetadataCalls(
@@ -227,7 +227,7 @@ public class TestInformationSchemaConnector
                         .addCopies("ConnectorMetadata.getSystemTable(schema=test_schema2, table=test_table1)", 4)
                         .addCopies("ConnectorMetadata.getSystemTable(schema=test_schema3_empty, table=test_table1)", 4)
                         .addCopies("ConnectorMetadata.getSystemTable(schema=test_schema4_empty, table=test_table1)", 4)
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 11)
                         .add("ConnectorMetadata.getMaterializedView(schema=test_schema1, table=test_table1)")
                         .add("ConnectorMetadata.getMaterializedView(schema=test_schema2, table=test_table1)")
                         .add("ConnectorMetadata.getMaterializedView(schema=test_schema3_empty, table=test_table1)")
@@ -249,7 +249,7 @@ public class TestInformationSchemaConnector
                 "SELECT count(table_name), count(table_type) from test_catalog.information_schema.tables WHERE table_name LIKE 'test_t_ble1'",
                 "VALUES (2, 2)",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 6)
                         .add("ConnectorMetadata.listSchemaNames")
                         .add("ConnectorMetadata.getRelationTypes(schema=test_schema1)")
                         .add("ConnectorMetadata.getRelationTypes(schema=test_schema2)")
@@ -269,7 +269,7 @@ public class TestInformationSchemaConnector
                         .addCopies("ConnectorMetadata.getSystemTable(schema=test_schema3_empty, table=test_table2)", 4)
                         .addCopies("ConnectorMetadata.getSystemTable(schema=test_schema4_empty, table=test_table1)", 4)
                         .addCopies("ConnectorMetadata.getSystemTable(schema=test_schema4_empty, table=test_table2)", 4)
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 16)
                         .add("ConnectorMetadata.getMaterializedView(schema=test_schema1, table=test_table1)")
                         .add("ConnectorMetadata.getMaterializedView(schema=test_schema1, table=test_table2)")
                         .add("ConnectorMetadata.getMaterializedView(schema=test_schema2, table=test_table2)")
@@ -308,7 +308,7 @@ public class TestInformationSchemaConnector
                 "VALUES 100",
                 ImmutableMultiset.<String>builder()
                         .addCopies("ConnectorMetadata.getSystemTable(schema=test_schema1, table=test_table1)", 4)
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 4)
                         .add("ConnectorMetadata.getMaterializedView(schema=test_schema1, table=test_table1)")
                         .add("ConnectorMetadata.getView(schema=test_schema1, table=test_table1)")
                         .add("ConnectorMetadata.redirectTable(schema=test_schema1, table=test_table1)")
@@ -326,7 +326,7 @@ public class TestInformationSchemaConnector
                 "VALUES 0",
                 ImmutableMultiset.<String>builder()
                         .addCopies("ConnectorMetadata.getSystemTable(schema=wrong_schema1, table=test_table1)", 4)
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 4)
                         .add("ConnectorMetadata.getMaterializedView(schema=wrong_schema1, table=test_table1)")
                         .add("ConnectorMetadata.getView(schema=wrong_schema1, table=test_table1)")
                         .add("ConnectorMetadata.redirectTable(schema=wrong_schema1, table=test_table1)")
@@ -337,7 +337,7 @@ public class TestInformationSchemaConnector
                 "VALUES 0",
                 ImmutableMultiset.<String>builder()
                         .addCopies("ConnectorMetadata.getSystemTable(schema=wrong_schema1, table=test_table1)", 4)
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 4)
                         .add("ConnectorMetadata.getMaterializedView(schema=wrong_schema1, table=test_table1)")
                         .add("ConnectorMetadata.getView(schema=wrong_schema1, table=test_table1)")
                         .add("ConnectorMetadata.redirectTable(schema=wrong_schema1, table=test_table1)")
@@ -347,14 +347,14 @@ public class TestInformationSchemaConnector
                 "SELECT count(*) FROM (SELECT * from test_catalog.information_schema.columns LIMIT 1)",
                 "VALUES 1",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 6)
                         .add("ConnectorMetadata.listSchemaNames")
                         .build());
         assertMetadataCalls(
                 "SELECT count(*) FROM (SELECT * from test_catalog.information_schema.columns LIMIT 1000)",
                 "VALUES 1000",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 6)
                         .add("ConnectorMetadata.listSchemaNames")
                         .add("ConnectorMetadata.streamRelationColumns(schema=test_schema1)")
                         .build());
@@ -364,7 +364,7 @@ public class TestInformationSchemaConnector
                 "SELECT count(table_name), count(table_type) from test_catalog.information_schema.tables WHERE table_schema = '' AND table_name = ''",
                 "VALUES (0, 0)",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 4)
                         .build());
 
         // Empty table schema
@@ -372,7 +372,7 @@ public class TestInformationSchemaConnector
                 "SELECT count(table_name), count(table_type) from test_catalog.information_schema.tables WHERE table_schema = ''",
                 "VALUES (0, 0)",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 3)
                         .build());
 
         // Empty table name
@@ -380,7 +380,7 @@ public class TestInformationSchemaConnector
                 "SELECT count(table_name), count(table_type) from test_catalog.information_schema.tables WHERE table_name = ''",
                 "VALUES (0, 0)",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 11)
                         .add("ConnectorMetadata.listSchemaNames")
                         .build());
 
@@ -389,7 +389,7 @@ public class TestInformationSchemaConnector
                 "SELECT count(table_name) from test_catalog.information_schema.tables WHERE table_schema LIKE 'test_sch_ma1'",
                 "VALUES 1000",
                 ImmutableMultiset.<String>builder()
-                        .addCopies("ConnectorMetadata.canonicalize", 2)
+                        .addCopies("ConnectorMetadata.canonicalize", 6)
                         .add("ConnectorMetadata.listSchemaNames")
                         .add("ConnectorMetadata.listTables(schema=test_schema1)")
                         // view-related methods such as listViews not being called

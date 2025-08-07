@@ -55,5 +55,10 @@ public class IcebergRestCatalogModule
         if (restCatalogConfig.isVendedCredentialsEnabled() && icebergConfig.isRegisterTableProcedureEnabled()) {
             throw new TrinoException(NOT_SUPPORTED, "Using the `register_table` procedure with vended credentials is currently not supported");
         }
+
+        // Validate that only one case sensitivity property is set to true at a time
+        if (restCatalogConfig.isCaseSensitiveNamesSupported() && restCatalogConfig.isCaseInsensitiveNameMatching()) {
+            throw new TrinoException(NOT_SUPPORTED, "Only one of 'iceberg.case-sensitive-names-supported' and 'iceberg.rest-catalog.case-insensitive-name-matching' can be set to true at a time");
+        }
     }
 }

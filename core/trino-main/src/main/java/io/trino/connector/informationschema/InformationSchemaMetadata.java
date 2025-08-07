@@ -67,7 +67,6 @@ import static io.trino.metadata.MetadataUtil.findColumnMetadata;
 import static io.trino.spi.StandardErrorCode.NOT_SUPPORTED;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static java.util.Collections.emptyList;
-import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 
@@ -239,7 +238,7 @@ public class InformationSchemaMetadata
         Optional<Set<String>> schemas = filterString(constraint, SCHEMA_COLUMN_HANDLE);
         if (schemas.isPresent()) {
             Set<QualifiedTablePrefix> schemasFromPredicate = schemas.get().stream()
-                    .filter(this::isLowerCase)
+                    .filter(schema -> canonicalNameDoesNotMatch(connectorSession, schema))
                     .filter(schema -> predicate.isEmpty() || predicate.get().test(schemaAsFixedValues(schema)))
                     .map(schema -> new QualifiedTablePrefix(catalogName, schema))
                     .collect(toImmutableSet());
@@ -282,7 +281,7 @@ public class InformationSchemaMetadata
                             .map(schemaName -> Stream.of(prefix))
                             .orElseGet(() -> listSchemaNames(session)))
                     .flatMap(prefix -> tables.get().stream()
-                            .filter(this::isLowerCase)
+                            .filter(table -> canonicalNameDoesNotMatch(connectorSession, table))
                             .map(table -> new QualifiedObjectName(catalogName, prefix.getSchemaName().get(), table)))
                     .filter(objectName -> predicate.isEmpty() || predicate.get().test(asFixedValues(objectName)))
                     .map(QualifiedObjectName::asQualifiedTablePrefix)
@@ -376,8 +375,11 @@ public class InformationSchemaMetadata
                 TABLE_NAME_COLUMN_HANDLE, new NullableValue(createUnboundedVarcharType(), utf8Slice(objectName.objectName())));
     }
 
-    private boolean isLowerCase(String value)
+    private boolean canonicalNameDoesNotMatch(ConnectorSession connectorSession, String value)
     {
-        return value.toLowerCase(ENGLISH).equals(value);
+        Session session = ((FullConnectorSession) connectorSession).getSession();
+
+        String canonicalizedName = metadata.getNameCanonicalizer(session, catalogName).canonicalize(value, true);
+        return canonicalizedName.equals(value);
     }
 }
