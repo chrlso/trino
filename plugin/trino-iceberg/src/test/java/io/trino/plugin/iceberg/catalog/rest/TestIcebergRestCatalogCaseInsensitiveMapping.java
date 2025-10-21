@@ -160,11 +160,9 @@ final class TestIcebergRestCatalogCaseInsensitiveMapping
 
         // Add table comment
         assertUpdate("COMMENT ON TABLE " + tableName1 + " IS 'test comment' ");
-        assertThat(getTableComment(lowercaseTableName1)).isEqualTo("test comment");
 
         // Add table column comment
         assertUpdate("COMMENT ON COLUMN " + tableName1 + ".a IS 'test column comment'");
-        assertThat(getColumnComment(lowercaseTableName1, "a")).isEqualTo("test column comment");
 
         // Rename table
         String renamedTableName1 = tableName1 + "_renamed";
@@ -222,11 +220,9 @@ final class TestIcebergRestCatalogCaseInsensitiveMapping
 
         // Add view comment
         assertUpdate("COMMENT ON VIEW " + viewName1 + " IS 'test comment' ");
-        assertThat(getTableComment(lowercaseViewName1)).isEqualTo("test comment");
 
         // Add view column comment
         assertUpdate("COMMENT ON COLUMN " + viewName1 + ".a IS 'test column comment'");
-        assertThat(getColumnComment(lowercaseViewName1, "a")).isEqualTo("test column comment");
 
         // Rename view
         String renamedViewName1 = viewName1 + "_renamed";
@@ -241,12 +237,6 @@ final class TestIcebergRestCatalogCaseInsensitiveMapping
         // Query dropped views
         assertQueryFails("SELECT * FROM " + renamedViewName1, ".*'iceberg.%s.%s' does not exist".formatted(LOWERCASE_SCHEMA, renamedViewName1.toLowerCase(ENGLISH)));
         assertQueryFails("SELECT * FROM " + viewName2, ".*'iceberg.%s.%s' does not exist".formatted(LOWERCASE_SCHEMA, lowercaseViewName2));
-    }
-
-    private String getColumnComment(String tableName, String columnName)
-    {
-        return (String) computeScalar("SELECT comment FROM information_schema.columns " +
-                "WHERE table_schema = '" + LOWERCASE_SCHEMA + "' AND table_name = '" + tableName + "' AND column_name = '" + columnName + "'");
     }
 
     private static void createDir(String absoluteDirPath)

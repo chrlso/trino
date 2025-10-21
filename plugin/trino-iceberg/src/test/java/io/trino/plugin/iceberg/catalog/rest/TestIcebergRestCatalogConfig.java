@@ -42,7 +42,8 @@ public class TestIcebergRestCatalogConfig
                 .setVendedCredentialsEnabled(false)
                 .setViewEndpointsEnabled(true)
                 .setCaseInsensitiveNameMatching(false)
-                .setCaseInsensitiveNameMatchingCacheTtl(new Duration(1, MINUTES)));
+                .setCaseInsensitiveNameMatchingCacheTtl(new Duration(1, MINUTES))
+                .setCaseSensitiveNamesSupported(false));
     }
 
     @Test
@@ -60,6 +61,7 @@ public class TestIcebergRestCatalogConfig
                 .put("iceberg.rest-catalog.view-endpoints-enabled", "false")
                 .put("iceberg.rest-catalog.case-insensitive-name-matching", "true")
                 .put("iceberg.rest-catalog.case-insensitive-name-matching.cache-ttl", "3m")
+                .put("iceberg.rest-catalog.case-sensitive-names-supported", "true")
                 .buildOrThrow();
 
         IcebergRestCatalogConfig expected = new IcebergRestCatalogConfig()
@@ -73,7 +75,8 @@ public class TestIcebergRestCatalogConfig
                 .setVendedCredentialsEnabled(true)
                 .setViewEndpointsEnabled(false)
                 .setCaseInsensitiveNameMatching(true)
-                .setCaseInsensitiveNameMatchingCacheTtl(new Duration(3, MINUTES));
+                .setCaseInsensitiveNameMatchingCacheTtl(new Duration(3, MINUTES))
+                .setCaseSensitiveNamesSupported(true);
 
         assertFullMapping(properties, expected);
     }

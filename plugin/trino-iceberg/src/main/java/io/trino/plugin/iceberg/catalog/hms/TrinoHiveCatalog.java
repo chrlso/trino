@@ -175,8 +175,7 @@ public class TrinoHiveCatalog
     @Override
     public boolean namespaceExists(ConnectorSession session, String namespace)
     {
-        if (!namespace.equals(namespace.toLowerCase(ENGLISH))) {
-            // Currently, Trino schemas are always lowercase, so this one cannot exist (https://github.com/trinodb/trino/issues/17)
+        if (!namespace.equals(canonicalize(namespace, true))) {
             return false;
         }
         if (HiveUtil.isHiveSystemSchema(namespace)) {
@@ -219,7 +218,7 @@ public class TrinoHiveCatalog
     public void createNamespace(ConnectorSession session, String namespace, Map<String, Object> properties, TrinoPrincipal owner)
     {
         Database.Builder database = Database.builder()
-                .setDatabaseName(namespace)
+                .setDatabaseName(namespace.toLowerCase(ENGLISH)) // Store in lowercase for metastore compatibility
                 .setOwnerType(isUsingSystemSecurity ? Optional.empty() : Optional.of(owner.getType()))
                 .setOwnerName(isUsingSystemSecurity ? Optional.empty() : Optional.of(owner.getName()));
 
@@ -483,7 +482,6 @@ public class TrinoHiveCatalog
             throwIfUnchecked(e.getCause());
             throw e;
         }
-
         return getIcebergTableWithMetadata(this, tableOperationsProvider, session, schemaTableName, metadata);
     }
 

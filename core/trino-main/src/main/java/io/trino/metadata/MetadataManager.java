@@ -130,7 +130,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -265,7 +264,7 @@ public final class MetadataManager
             for (CatalogHandle catalogHandle : catalogMetadata.listCatalogHandles()) {
                 ConnectorMetadata metadata = catalogMetadata.getMetadataFor(session, catalogHandle);
                 metadata.listSchemaNames(connectorSession).stream()
-                        .map(schema -> schema.toLowerCase(Locale.ENGLISH))
+                        .map(schema -> metadata.canonicalize(session.toConnectorSession(), schema, true))
                         .filter(schema -> !isExternalInformationSchema(catalogHandle, schema))
                         .forEach(schemaNames::add);
             }
@@ -3044,5 +3043,18 @@ public final class MetadataManager
             return systemSecurityMetadata.getFunctionsAuthorizationInfo(session, prefix);
         }
         return ImmutableSet.of();
+    }
+
+    @Override
+    public NameCanonicalizer getNameCanonicalizer(Session session, String catalogName)
+    {
+        Optional<CatalogMetadata> metadata = getOptionalCatalogMetadata(session, catalogName);
+
+        if (metadata.isPresent()) {
+            CatalogHandle catalogHandle = metadata.get().getCatalogHandle();
+            return (identifier, delimited) ->
+                    metadata.get().getMetadata(session).canonicalize(session.toConnectorSession(catalogHandle), identifier, delimited);
+        }
+        return NameCanonicalizer.LEGACY_NAME_CANONICALIZER;
     }
 }

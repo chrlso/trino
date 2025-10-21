@@ -67,6 +67,7 @@ public class TrinoIcebergRestCatalogFactory
     private final boolean uniqueTableLocation;
     private final TypeManager typeManager;
     private final boolean caseInsensitiveNameMatching;
+    private final boolean caseSensitiveNamesSupported;
     private final Cache<Namespace, Namespace> remoteNamespaceMappingCache;
     private final Cache<TableIdentifier, TableIdentifier> remoteTableMappingCache;
 
@@ -101,7 +102,9 @@ public class TrinoIcebergRestCatalogFactory
         requireNonNull(icebergConfig, "icebergConfig is null");
         this.uniqueTableLocation = icebergConfig.isUniqueTableLocation();
         this.typeManager = requireNonNull(typeManager, "typeManager is null");
+        // Use the new case sensitivity configuration from IcebergConfig, fallback to REST config for backward compatibility
         this.caseInsensitiveNameMatching = restConfig.isCaseInsensitiveNameMatching();
+        this.caseSensitiveNamesSupported = restConfig.isCaseSensitiveNamesSupported();
         this.remoteNamespaceMappingCache = EvictableCacheBuilder.newBuilder()
                 .expireAfterWrite(restConfig.getCaseInsensitiveNameMatchingCacheTtl().toMillis(), MILLISECONDS)
                 .shareNothingWhenDisabled()
@@ -161,6 +164,7 @@ public class TrinoIcebergRestCatalogFactory
                 typeManager,
                 uniqueTableLocation,
                 caseInsensitiveNameMatching,
+                caseSensitiveNamesSupported,
                 remoteNamespaceMappingCache,
                 remoteTableMappingCache,
                 viewEndpointsEnabled);

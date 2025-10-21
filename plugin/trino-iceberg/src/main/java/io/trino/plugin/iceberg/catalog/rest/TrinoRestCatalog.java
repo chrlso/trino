@@ -116,6 +116,7 @@ public class TrinoRestCatalog
     private final String trinoVersion;
     private final boolean useUniqueTableLocation;
     private final boolean caseInsensitiveNameMatching;
+    private final boolean caseSensitiveNamesSupported;
     private final Cache<Namespace, Namespace> remoteNamespaceMappingCache;
     private final Cache<TableIdentifier, TableIdentifier> remoteTableMappingCache;
     private final boolean viewEndpointsEnabled;
@@ -134,6 +135,7 @@ public class TrinoRestCatalog
             TypeManager typeManager,
             boolean useUniqueTableLocation,
             boolean caseInsensitiveNameMatching,
+            boolean caseSensitiveNamesSupported,
             Cache<Namespace, Namespace> remoteNamespaceMappingCache,
             Cache<TableIdentifier, TableIdentifier> remoteTableMappingCache,
             boolean viewEndpointsEnabled)
@@ -147,6 +149,7 @@ public class TrinoRestCatalog
         this.typeManager = requireNonNull(typeManager, "typeManager is null");
         this.useUniqueTableLocation = useUniqueTableLocation;
         this.caseInsensitiveNameMatching = caseInsensitiveNameMatching;
+        this.caseSensitiveNamesSupported = caseSensitiveNamesSupported;
         this.remoteNamespaceMappingCache = requireNonNull(remoteNamespaceMappingCache, "remoteNamespaceMappingCache is null");
         this.remoteTableMappingCache = requireNonNull(remoteTableMappingCache, "remoteTableMappingCache is null");
         this.viewEndpointsEnabled = viewEndpointsEnabled;
@@ -285,7 +288,7 @@ public class TrinoRestCatalog
                     throw new TrinoException(ICEBERG_CATALOG_ERROR, "Failed to list tables", e);
                 }
             }).stream()
-                    .map(id -> new TableInfo(SchemaTableName.schemaTableName(toSchemaName(id.namespace()), id.name()), TableInfo.ExtendedRelationType.TABLE))
+                    .map(id -> new TableInfo(SchemaTableName.schemaTableName(canonicalize(toSchemaName(id.namespace()), true), canonicalize(id.name(), true)), TableInfo.ExtendedRelationType.TABLE))
                     .forEach(tables::add);
             if (viewEndpointsEnabled) {
                 listTableIdentifiers(restNamespace, () -> {
@@ -296,7 +299,7 @@ public class TrinoRestCatalog
                         throw new TrinoException(ICEBERG_CATALOG_ERROR, "Failed to list views", e);
                     }
                 }).stream()
-                        .map(id -> new TableInfo(SchemaTableName.schemaTableName(toSchemaName(id.namespace()), id.name()), TableInfo.ExtendedRelationType.OTHER_VIEW))
+                        .map(id -> new TableInfo(SchemaTableName.schemaTableName(canonicalize(toSchemaName(id.namespace()), true), canonicalize(id.name(), true)), TableInfo.ExtendedRelationType.OTHER_VIEW))
                         .forEach(tables::add);
             }
         }
@@ -440,7 +443,7 @@ public class TrinoRestCatalog
     @Override
     public void registerTable(ConnectorSession session, SchemaTableName tableName, TableMetadata tableMetadata)
     {
-        TableIdentifier tableIdentifier = TableIdentifier.of(toRemoteNamespace(session, toNamespace(tableName.getSchemaName())), tableName.getTableName());
+        TableIdentifier tableIdentifier = TableIdentifier.of(toRemoteNamespace(session, toNamespace(tableName.getSchemaName())), canonicalize(tableName.getTableName(), true));
         try {
             restSessionCatalog.registerTable(convert(session), tableIdentifier, tableMetadata.metadataFileLocation());
         }
@@ -1009,5 +1012,14 @@ public class TrinoRestCatalog
     private static Namespace toTrinoNamespace(Namespace namespace)
     {
         return Namespace.of(Arrays.stream(namespace.levels()).map(level -> level.toLowerCase(ENGLISH)).toArray(String[]::new));
+    }
+
+    @Override
+    public String canonicalize(String name, boolean delimited)
+    {
+        if (caseSensitiveNamesSupported && delimited) {
+            return name;
+        }
+        return name.toLowerCase(ENGLISH);
     }
 }
